@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace Lab_CSharp.Models
 {
@@ -16,6 +17,15 @@ namespace Lab_CSharp.Models
 
         public Person(string firstName, string lastName, string email, DateTime birthDate)
         {
+            if (birthDate > DateTime.Today)
+                throw new FutureBirthDateException("You haven't been born yet!");
+
+            if (CalculateAge(birthDate) > 135)
+                throw new TooOldPersonException("You are dead!");
+
+            if (!IsValidEmail(email))
+                throw new InvalidEmailException("Error: Email is not valid!");
+
             FirstName = firstName;
             LastName = lastName;
             Email = email;
@@ -64,6 +74,11 @@ namespace Lab_CSharp.Models
             int age = today.Year - birthDate.Year;
             if (birthDate > today.AddYears(-age)) age--; // Якщо день народження ще не настав цього року
             return age;
+        }
+
+        private bool IsValidEmail(string email)
+        {
+            return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
         }
     }
 }

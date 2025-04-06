@@ -2,6 +2,7 @@
 using Lab_CSharp.Models;
 using System;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -73,48 +74,48 @@ namespace Lab_CSharp.ViewModels
             // await Task.Delay(1000);
             if (!BirthDate.HasValue) return;
 
-            var person = new Person(FirstName, LastName, Email, BirthDate.Value);
+            try
+            {
+                var person = new Person(FirstName, LastName, Email, BirthDate.Value);
+                int age = person.CalculateAge(BirthDate.Value);
+
+                ResultText = $"Name: {person.FirstName}\n" +
+                             $"Surname: {person.LastName}\n" +
+                             $"Email: {person.Email}\n" +
+                             $"Birth date: {person.BirthDate.ToShortDateString()}\n" +
+                             $"Age: {age} years old\n" +
+                             $"is Adult: {person.IsAdult}\n" +
+                             $"Western zodiac: {person.SunSign}\n" +
+                             $"Chineese zodiac: {person.ChineseSign}\n" +
+                             $"Has birthday today: {person.IsBirthday}";
 
 
-            int age = person.CalculateAge(BirthDate.Value);
+                if (person.IsBirthday)
+                {
+                    MessageBox.Show($"Happy birthday, {FirstName}! 🎉", "Congrats!", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
 
-            if (age < 0)
+            }
+            catch (FutureBirthDateException ex)
             {
                 MessageBox.Show("You haven't been born yet!", "Error!!!", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
             }
-
-            if (age > 135)
+            catch (TooOldPersonException ex)
             {
                 MessageBox.Show("You are dead!", "Error!!!", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
             }
-
-
-            if (!Email.Contains("@"))
+            catch (InvalidEmailException ex)
             {
-                ResultText = "Error: Email must have @!";
+                ResultText = "Error: Email is not valid!";
                 IsProcessing = false;
-                return;
             }
-
-
-            ResultText = $"Name: {person.FirstName}\n" +
-                         $"Surname: {person.LastName}\n" +
-                         $"Email: {person.Email}\n" +
-                         $"Birth date: {person.BirthDate.ToShortDateString()}\n" +
-                         $"Age: {age} years old\n" +
-                         $"is Adult: {person.IsAdult}\n" +
-                         $"Western zodiac: {person.SunSign}\n" +
-                         $"Chineese zodiac: {person.ChineseSign}\n" +
-                         $"Has birthday today: {person.IsBirthday}";
-
-            if (person.IsBirthday)
+            catch (Exception ex)
             {
-                MessageBox.Show($"Happy birthday, {FirstName}! 🎉", "Congrats!", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"САЗ умер: {ex.Message}", "504 gateway timeout", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        
 
-            IsProcessing = false;
+        IsProcessing = false;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
